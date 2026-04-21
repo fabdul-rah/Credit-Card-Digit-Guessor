@@ -1,35 +1,34 @@
-def separateNums(card_input):
-    oddDoubledNumbers = []
-    evenNumbers = []
+"""CLI: compute the Luhn check digit for digits entered *without* the final check digit."""
 
-    for i, char in enumerate(card_input):
-        if i % 2 == 0:
-            doubled_value = int(char) * 2
-            if doubled_value > 9:
-                sum_of_digits = (doubled_value // 10) + (doubled_value % 10)
-                oddDoubledNumbers.append(sum_of_digits)
-            else:
-                oddDoubledNumbers.append(doubled_value)
-        else:
-            evenNumbers.append(int(char))
-    return oddDoubledNumbers, evenNumbers
+from luhn import luhn_check_digit, luhn_complete, luhn_is_valid
+from schemes import matching_schemes, suggested_lengths_for_prefix
 
-def calculateLastDigit(oddDoubledNumbers, evenNumbers):
-    total_sum = sum(oddDoubledNumbers) + sum(evenNumbers)
-    last_digit = (10 - (total_sum % 10)) % 10  # Luhn Algorithm
-    return last_digit
 
-card_input = input("Enter the first 15 digits of your card number: ")
+def main() -> None:
+    raw = input("Enter all digits except the final check digit (spaces OK): ").strip()
+    digits = "".join(c for c in raw if c.isdigit())
+    if not digits:
+        print("You need at least one digit.")
+        return
 
-if card_input.isdigit() and len(card_input) == 15:
-    print("You've entered:", card_input)
-    oddDoubledNumbers, evenNumbers = separateNums(card_input)
-    
-    last_digit = calculateLastDigit(oddDoubledNumbers, evenNumbers)
-    full_credit_card_number = card_input + str(last_digit)
-    
-    print("The last correct digit of the credit card is:", last_digit)
-    print("The full credit card number with the last correct digit is:", full_credit_card_number)
-    
-else:
-    print("Input must be exactly 15 digits!")
+    try:
+        last = luhn_check_digit(digits)
+    except ValueError as e:
+        print(e)
+        return
+
+    full = luhn_complete(digits)
+    schemes = matching_schemes(digits)
+    labels = ", ".join(s.label for s in schemes if s.id != "unknown") or schemes[-1].label
+    lengths = suggested_lengths_for_prefix(digits)
+
+    print("Digits (check omitted):", digits)
+    print("Detected network(s):", labels)
+    print("Typical total lengths (digits):", ", ".join(str(n) for n in lengths))
+    print("Check digit:", last)
+    print("Full number:", full)
+    print("Luhn valid:", luhn_is_valid(full))
+
+
+if __name__ == "__main__":
+    main()

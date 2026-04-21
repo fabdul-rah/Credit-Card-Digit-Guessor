@@ -1,6 +1,16 @@
-## Credit Card Validator
+## Credit Card Check Digit (Luhn)
 
-This Python script implements a basic credit card number validation using the Luhn algorithm. It prompts the user to enter the first 15 digits of a credit card number and then calculates the correct last digit based on the Luhn checksum.
+This project computes the **Luhn (mod 10) check digit** for a card number entered **without** its final digit. The algorithm matches real issuer rules for Visa, Mastercard, American Express, and other networks, including **different PAN lengths** (for example, 14 digits before the check digit for 15-digit AmEx, or 15 digits before the check for 16-digit Visa/Mastercard).
+
+### For a portfolio (coursework / minor / admissions)
+
+Use this README to explain **what you built** and **how you work**:
+
+- **Problem** — Many tutorials hard-code “double every other digit from the left,” which is wrong for some real card lengths. This repo implements Luhn from the **right**, so the check digit is correct for typical 16-digit paths **and** 15-digit AmEx-style bodies.
+- **Evidence** — Run `pytest` and mention the **step-by-step trace** in the web UI (expand *Show step-by-step Luhn math*) so reviewers can follow the arithmetic. Optionally publish the **`docs/`** build to **GitHub Pages** and link the live site on your résumé (see below).
+- **Ethics** — State clearly that you only use **test numbers**, that Luhn is a **checksum** (not proof of a real account), and that you are not collecting or storing card data.
+
+Optional: add your name and a link to a short screen recording in this section when you submit the portfolio.
 
 ### Luhn Algorithm Overview
 
@@ -12,41 +22,70 @@ The Luhn algorithm (also known as the mod-10 algorithm) is a checksum formula us
    
 3. **Calculate the check digit** that makes the total sum a multiple of 10. This is done by taking the total sum modulo 10, and then subtracting this value from 10.
 
-### How It Works
+### Layout
 
-The script implements the Luhn algorithm with the following steps:
+- `luhn.py` — length-correct Luhn check digit and validation.
+- `schemes.py` — issuer hints (Visa, Mastercard, AmEx, Discover, Diners, JCB, UnionPay) from the digit prefix.
+- `app.py` — Flask web UI and JSON API (local or any Python host).
+- `card.py` — command-line interface.
+- `docs/` — **static** site for **GitHub Pages** (`index.html`, `css/`, `js/`) — same math as `luhn.py`, runs in the browser (no server).
 
-1. **Separating Digits**: The `separateNums(card_input)` function separates the digits of the card input into two lists:
-   - `oddDoubledNumbers`: Contains modified (doubled and summed if necessary) odd-indexed digits.
-   - `evenNumbers`: Contains even-indexed digits.
-   
-2. **Doubling and Summing**: In `separateNums(card_input)`, odd-indexed digits are doubled, and if the result is greater than 9, the sum of the resulting digits is used.
-   
-3. **Checksum Calculation**: The `calculateLastDigit(oddDoubledNumbers, evenNumbers)` function calculates the last digit of the credit card number using the Luhn checksum formula:
-   - It sums up all the digits from `oddDoubledNumbers` and `evenNumbers`.
-   - Then, it calculates the check digit (`last_digit`) that makes the total sum a multiple of 10.
+### GitHub Pages (public website)
 
-4. **Validation**: The script prompts the user to input the first 15 digits of a credit card number. If the input is valid (exactly 15 digits), it proceeds with the validation process. Otherwise, it prompts the user to provide a valid input.
+GitHub Pages only serves static files. The published app lives in **`docs/`** (HTML, CSS, ES modules). Logic mirrors `luhn.py` / `schemes.py` in JavaScript.
 
-### Usage
+1. Push the repository to GitHub.
+2. In the repo: **Settings → Pages → Build and deployment**.
+3. **Source**: **Deploy from a branch**.
+4. Branch: **`main`** (or your default), folder: **`/docs`**, then **Save**.
+5. After a short build, the site is at **`https://<username>.github.io/<repository>/`** (exact URL is shown on the Pages settings screen).
 
-1. **Input Prompt**: Run the script and enter the first 15 digits of your credit card number when prompted.
+Edit **`docs/index.html`**: replace `YOUR_USERNAME` in the `<meta name="github-repo" content="https://github.com/YOUR_USERNAME/Credit-Card-Digit-Guessor" />` line with your real GitHub username (and repo name if you renamed it).
 
-2. **Output**: The script will display the last correct digit of the credit card number based on the Luhn algorithm, as well as the full credit card number with the correct last digit appended.
-
-### Usage Example
+**Preview `docs/` locally:**
 
 ```bash
-$ python credit_card_validator.py
-Enter the first 15 digits of your card number: 123456789012345
-You've entered: 123456789012345
-The last correct digit of the credit card is: 5
-The full credit card number with the last correct digit is: 1234567890123455
+cd docs && python3 -m http.server 8080
 ```
+
+Open `http://127.0.0.1:8080/` (use a local server so ES modules load correctly).
+
+### Web interface (Flask, local)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python app.py
+```
+
+Open `http://127.0.0.1:5000`. Choose a card network or leave **Auto-detect**; type all digits **except** the check digit to see the computed last digit and full number.
+
+### CLI
+
+```bash
+python card.py
+```
+
+### Tests
+
+```bash
+pytest
+```
+
+### API example
+
+```bash
+curl -s -X POST http://127.0.0.1:5000/api/check-digit \
+  -H "Content-Type: application/json" \
+  -d '{"body":"37828224631000","trace":true}'
+```
+
+Set `"trace": true` to include a per-digit breakdown (`steps`, `sum_transformed_body`, `check_digit`) for demos or write-ups.
 
 ### Requirements
 
-- Python 3.x (Tested on Python 3.7)
+- Python 3.10 or newer (use a virtual environment; see above).
 
 ### Notes
 

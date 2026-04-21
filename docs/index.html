@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Student portfolio: Luhn (mod 10) check digit calculator with issuer hints and step-by-step trace — runs on GitHub Pages; use only fake card numbers."
+    />
+    <meta name="github-repo" content="https://github.com/YOUR_USERNAME/Credit-Card-Digit-Guessor" />
+    <title>Luhn check digit — portfolio demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <main class="shell">
+      <header class="hero">
+        <p class="eyebrow">GitHub Pages · student portfolio · educational only · never real card data</p>
+        <h1>Luhn check digit</h1>
+        <p class="lede">
+          Enter every digit <strong>except</strong> the final check digit. The correct last digit is computed in your browser using the same mod-10
+          rule used by Visa, Mastercard, AmEx, and other issuers.
+        </p>
+      </header>
+
+      <aside class="portfolio-callout" aria-label="Portfolio summary">
+        <h2 class="portfolio-callout-title">What this project shows</h2>
+        <ul class="portfolio-callout-list">
+          <li><strong>Algorithms</strong> — correct Luhn parity for any body length (16-digit Visa-style and 15-digit AmEx-style).</li>
+          <li><strong>Static web</strong> — this Pages build is plain HTML, CSS, and ES modules (no server); the repo also includes Python + Flask for local demos and <code>pytest</code>.</li>
+          <li><strong>Quality</strong> — JavaScript mirrors <code>luhn.py</code>; run <code>pytest</code> in the repository to verify the reference implementation.</li>
+          <li><strong>Digital citizenship</strong> — checksums do not prove a card is real, funded, or yours; use test numbers only.</li>
+        </ul>
+      </aside>
+
+      <section class="panel" aria-labelledby="form-heading">
+        <h2 id="form-heading" class="sr-only">Calculator</h2>
+        <div class="field-row">
+          <label class="field">
+            <span class="label">Card network</span>
+            <select id="scheme" name="scheme" autocomplete="off">
+              <option value="">Auto-detect from digits</option>
+              <option value="visa">Visa (13, 16, 19 digits)</option>
+              <option value="mastercard">Mastercard (16 digits)</option>
+              <option value="amex">American Express (15 digits)</option>
+              <option value="discover">Discover (16, 19 digits)</option>
+              <option value="diners">Diners Club (14, 16, 19 digits)</option>
+              <option value="jcb">JCB (16, 19 digits)</option>
+              <option value="unionpay">UnionPay (16, 17, 18, 19 digits)</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="field">
+          <span class="label">Number without check digit</span>
+          <input
+            id="body"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="e.g. 453201511283036 or 37828224631000"
+            aria-describedby="hint"
+          />
+          <span id="hint" class="hint">Spaces are fine. Use test values only.</span>
+        </label>
+
+        <div id="banner" class="banner" role="status" hidden></div>
+
+        <div class="results" id="results" hidden>
+          <p id="live-results" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+          <div class="chip-row">
+            <span class="chip" id="chip-scheme">—</span>
+            <span class="chip ghost" id="chip-length">—</span>
+          </div>
+          <div class="big-digits">
+            <span class="muted">Check digit</span>
+            <output id="check" for="body">—</output>
+          </div>
+          <div class="full-row">
+            <span class="muted">Full number</span>
+            <code id="full" class="pan"></code>
+            <button type="button" class="btn ghost sm" id="copy">Copy</button>
+          </div>
+
+          <details class="trace-details" id="trace-details">
+            <summary class="trace-summary">Show step-by-step Luhn math</summary>
+            <p class="trace-lede">
+              Counting from the <strong>right</strong> of the full number, the check digit is position 1 (never doubled). Each row shows how one
+              digit you typed contributes to the running sum before the check digit is chosen so the total is a multiple of 10.
+            </p>
+            <div class="trace-scroll">
+              <table class="trace-table" id="trace-table" hidden>
+                <caption class="sr-only">
+                  Per-digit Luhn contributions for digits entered without the check digit
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">From right</th>
+                    <th scope="col">Digit</th>
+                    <th scope="col">×2?</th>
+                    <th scope="col">Add</th>
+                  </tr>
+                </thead>
+                <tbody id="trace-body"></tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="4" class="trace-foot-label">Sum of transformed digits</td>
+                    <td id="trace-sum" class="trace-foot-num"></td>
+                  </tr>
+                  <tr>
+                    <td colspan="4" class="trace-foot-label">Check digit (10 − sum mod 10, mod 10)</td>
+                    <td id="trace-check" class="trace-foot-num trace-accent"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <p>
+          Hosted on <strong>GitHub Pages</strong> from the <code>docs/</code> folder. Full source, Flask version, and tests live in the same
+          repository — update the <code>meta name="github-repo"</code> link in <code>index.html</code> to your fork.
+        </p>
+        <p class="foot-note">
+          <strong>Try it:</strong> <code>7992739871</code> → check digit <code>3</code>. <code>37828224631000</code> → <code>5</code>.
+        </p>
+      </footer>
+    </main>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
