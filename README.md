@@ -37,8 +37,12 @@ GitHub Pages only serves static files. The published app lives in **`docs/`** (H
 1. Push the repository to GitHub.
 2. In the repo: **Settings → Pages → Build and deployment**.
 3. **Source**: **Deploy from a branch**.
-4. Branch: **`main`** (or your default), folder: **`/docs`**, then **Save**.
+4. Branch: **`main`** (or your default), folder: **`/docs`** (not **`/` (root)** — root shows the README), then **Save**.
 5. After a short build, the site is at **`https://<username>.github.io/<repository>/`** (exact URL is shown on the Pages settings screen).
+
+**If you only see the README:** your Pages folder is almost certainly **`/` (root)**. Change it to **`/docs`** and wait for the green “Your site is live” banner, then hard-refresh the site (Ctrl+Shift+R / Cmd+Shift+R).
+
+There is also a small **`index.html` at the repository root** that redirects browsers to **`docs/`** if you keep publishing from root — switching to **`/docs`** is still the recommended setup so the app URL stays clean.
 
 Edit **`docs/index.html`**: replace `YOUR_USERNAME` in the `<meta name="github-repo" content="https://github.com/YOUR_USERNAME/Credit-Card-Digit-Guessor" />` line with your real GitHub username (and repo name if you renamed it).
 
